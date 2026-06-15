@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preventivatore AI — Termoflex Srl</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #2ca1fe;
+    --accent2: #00d4aa;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --green: #10b981;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d1829 0%, #0a1520 50%, #0d1829 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--accent2), var(--accent)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .brand-name { font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px; }
+  .brand-title { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; }
+  .header-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 12px; color: var(--text-dim); }
+
+  /* WORK NOTE */
+  .work-note { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 8px; padding: 10px 16px; font-size: 12px; color: var(--warn); margin: 20px 40px 0; display: flex; align-items: flex-start; gap: 8px; }
+
+  /* MAIN LAYOUT */
+  .main { display: grid; grid-template-columns: 420px 1fr; gap: 0; min-height: calc(100vh - 100px); }
+
+  /* FORM PANEL */
+  .form-panel {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 28px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  .panel-title { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 13px; font-weight: 500; color: var(--text-dim); }
+  .field textarea, .field select, .field input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    transition: border-color 0.15s;
+    resize: none;
+  }
+  .field textarea:focus, .field select:focus, .field input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .field textarea { min-height: 120px; }
+  .field select option { background: #1a2235; }
+
+  .tag-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag-btn {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 12px; font-size: 12px; color: var(--text-dim); cursor: pointer; transition: all 0.15s;
+  }
+  .tag-btn:hover { border-color: var(--accent); color: var(--text); }
+  .tag-btn.active { background: rgba(44,161,254,0.12); border-color: var(--accent); color: var(--accent); }
+
+  .generate-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(135deg, var(--accent), #1a7fd4);
+    color: white; border: none; border-radius: 10px;
+    padding: 14px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; margin-top: 4px;
+  }
+  .generate-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(44,161,254,0.35); }
+  .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .examples { display: flex; flex-direction: column; gap: 6px; }
+  .example-btn {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; font-size: 12px; color: var(--text-dim); cursor: pointer;
+    text-align: left; transition: all 0.15s; line-height: 1.4;
+  }
+  .example-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  .divider { height: 1px; background: var(--border); }
+
+  /* RESULT PANEL */
+  .result-panel { padding: 28px; display: flex; flex-direction: column; }
+
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 14px; color: var(--text-muted);
+  }
+  .empty-icon { font-size: 48px; opacity: 0.3; }
+  .empty-title { font-family: 'Sora', sans-serif; font-size: 16px; color: var(--text-dim); }
+  .empty-sub { font-size: 13px; max-width: 300px; line-height: 1.6; }
+
+  /* PREVENTIVO OUTPUT */
+  .preventivo { display: none; flex-direction: column; gap: 20px; }
+
+  .prev-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;
+  }
+  .prev-azienda { font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+  .prev-titolo { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
+  .prev-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .prev-numero { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); background: rgba(44,161,254,0.08); border: 1px solid rgba(44,161,254,0.2); border-radius: 6px; padding: 6px 12px; }
+
+  /* URGENZA BADGE */
+  .urgenza-alta { color: var(--danger); background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); border-radius: 6px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+  .urgenza-media { color: var(--warn); background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); border-radius: 6px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+  .urgenza-standard { color: var(--green); background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); border-radius: 6px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+
+  /* TABELLA VOCI */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+  .card-title { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .voci-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .voci-table th { font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  .voci-table th:last-child { text-align: right; }
+  .voci-table td { padding: 10px 10px; border-bottom: 1px solid rgba(30,45,69,0.4); vertical-align: top; }
+  .voci-table td:last-child { text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .voci-table tr:last-child td { border-bottom: none; }
+  .voce-desc { color: var(--text); }
+  .voce-det { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); }
+
+  .totale-row { background: var(--surface2); border-radius: 8px; padding: 14px 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .totale-label { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
+  .totale-value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 500; color: var(--accent); }
+  .totale-iva { font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 2px; }
+
+  /* NOTE OPERATIVE */
+  .note-content { font-size: 13px; color: var(--text-dim); line-height: 1.75; white-space: pre-wrap; }
+
+  /* AVVERTENZA AI */
+  .ai-disclaimer {
+    background: rgba(44,161,254,0.06); border: 1px solid rgba(44,161,254,0.15);
+    border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--text-muted);
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+
+  /* ACTIONS */
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .action-btn {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 18px; font-size: 13px; color: var(--text-dim); cursor: pointer;
+    transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  .error-box { display: none; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: var(--danger); }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 20px 40px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .form-panel { border-right: none; border-bottom: 1px solid var(--border); }
+    .header, .work-note { padding-left: 20px; padding-right: 20px; }
+    .result-panel { padding: 20px; }
+    .work-note { margin: 16px 20px 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <div class="brand-icon">📋</div>
+    <div>
+      <div class="brand-name">Termoflex Srl · Bologna</div>
+      <div class="brand-title">Preventivatore AI</div>
+    </div>
+  </div>
+  <div class="header-badge">Bozza assistita · revisione umana richiesta</div>
+</div>
+
+<div class="work-note">
+  <span>⚠</span>
+  <span><strong>Strumento dimostrativo</strong> — Listino e dati aziendali fittizi. Il preventivo generato è una bozza AI da revisionare prima dell'invio al cliente.</span>
+</div>
+
+<div class="main">
+
+  <!-- FORM PANEL -->
+  <div class="form-panel">
+    <div>
+      <div class="panel-title">Nuova richiesta</div>
+    </div>
+
+    <div class="field">
+      <label>Descrizione richiesta cliente</label>
+      <textarea id="richiesta" placeholder="Es. Compressore Atlas Copco GA11 fermo da stamattina, perdita d'olio dal separatore. Cliente in produzione, serve intervento urgente oggi…"></textarea>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <label>Esempi rapidi</label>
+      <div class="examples">
+        <button class="example-btn" onclick="caricaEsempio(0)">🔧 Compressore fermo — perdita olio, intervento urgente</button>
+        <button class="example-btn" onclick="caricaEsempio(1)">❄️ Gruppo frigo — allarme alta pressione, ricarica gas</button>
+        <button class="example-btn" onclick="caricaEsempio(2)">⚙️ Manutenzione programmata annuale — linea aria compressa</button>
+        <button class="example-btn" onclick="caricaEsempio(3)">🔩 Sostituzione pompa centrifuga — impianto raffreddamento</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <label>Tipo impianto</label>
+      <select id="tipo-impianto">
+        <option value="aria compressa">Aria compressa</option>
+        <option value="refrigerazione">Refrigerazione / gruppi frigo</option>
+        <option value="meccanica">Meccanica industriale</option>
+        <option value="misto">Misto / non specificato</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Urgenza</label>
+      <div class="tag-group">
+        <button class="tag-btn" id="urg-standard" onclick="setUrgenza('standard')">Standard</button>
+        <button class="tag-btn active" id="urg-media" onclick="setUrgenza('media')">Media</button>
+        <button class="tag-btn" id="urg-alta" onclick="setUrgenza('alta')">Alta — intervento entro oggi</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Cliente (opzionale)</label>
+      <input type="text" id="cliente" placeholder="Es. Officine Rossi Srl — Modena">
+    </div>
+
+    <button class="generate-btn" id="gen-btn" onclick="generaPreventivo()">
+      <span id="gen-icon">✨</span>
+      <span id="gen-spin" class="spinner"></span>
+      <span id="gen-txt">Genera preventivo</span>
+    </button>
+
+    <div class="error-box" id="error-box">⚠ Errore nella generazione. Verifica la connessione e riprova.</div>
+  </div>
+
+  <!-- RESULT PANEL -->
+  <div class="result-panel">
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">📄</div>
+      <div class="empty-title">Nessun preventivo generato</div>
+      <div class="empty-sub">Descrivi la richiesta del cliente nel form a sinistra e premi "Genera preventivo"</div>
+    </div>
+
+    <div class="preventivo" id="preventivo">
+
+      <div class="prev-header">
+        <div>
+          <div class="prev-azienda">Termoflex Srl — Preventivo</div>
+          <div class="prev-titolo" id="prev-titolo">—</div>
+          <div class="prev-meta" id="prev-meta">—</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <div class="prev-numero" id="prev-numero">PRV-—</div>
+          <div id="prev-urgenza-badge"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot"></span>Voci di preventivo</div>
+        <table class="voci-table">
+          <thead>
+            <tr>
+              <th style="width:40%">Descrizione</th>
+              <th>Q.tà</th>
+              <th>U.M.</th>
+              <th>Prezzo unit.</th>
+              <th>Totale</th>
+            </tr>
+          </thead>
+          <tbody id="voci-body"></tbody>
+        </table>
+        <div class="totale-row">
+          <div class="totale-label">Totale preventivo</div>
+          <div>
+            <div class="totale-value" id="totale-value">—</div>
+            <div class="totale-iva" id="totale-iva">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Note operative e raccomandazioni</div>
+        <div class="note-content" id="note-content">—</div>
+      </div>
+
+      <div class="ai-disclaimer">
+        <span>🤖</span>
+        <span>Bozza generata da Claude (claude-sonnet-4-6) sulla base del listino Termoflex Srl. Verificare disponibilità ricambi, tempi tecnici reali e condizioni di accesso prima dell'invio al cliente.</span>
+      </div>
+
+      <div class="actions">
+        <button class="action-btn" onclick="stampa()">🖨 Stampa / Salva PDF</button>
+        <button class="action-btn" onclick="nuovoPreventivo()">↩ Nuovo preventivo</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  Portfolio · <a href="https://alessandro-dardi.netlify.app" target="_blank">Alessandro Dardi</a> · Operations &amp; Digital Automation · Bologna
+</div>
+
+<script>
+const ESEMPI = [
+  "Compressore Atlas Copco GA11 da 11kW fermo da stamattina ore 7. Il cliente segnala perdita d'olio abbondante dal separatore olio/aria e pressione che non sale oltre 4 bar. L'impianto alimenta 3 linee di produzione, il fermo sta bloccando la produzione. Serve intervento urgente in giornata. Cliente: Metalflex Srl, Castelmaggiore (BO).",
+  "Gruppo frigo Climaveneta da 60kW in allarme alta pressione lato condensatore dall'altra sera. Il tecnico interno ha già verificato che il ventilatore del condensatore è fermo (motore bruciato). Probabilmente è anche necessaria una ricarica parziale di gas R-410A (stimano perdita dal raccordo Schrader). Cliente: Ceramiche Benassi, Imola.",
+  "Manutenzione programmata annuale sulla linea aria compressa: 2 compressori rotativi da 7,5kW + 1 essiccatore a refrigerazione. Cambio filtri (aria, olio, desiccante), cambio olio, verifica valvole di sicurezza, taratura pressostati, pulizia condensatore essiccatore. Nessuna urgenza, da pianificare in un sabato mattina per non fermare la produzione.",
+  "Sostituzione pompa centrifuga 2 pollici inox su circuito raffreddamento stampi. La pompa attuale ha il cuscinetto anteriore rumoroso e una piccola perdita dalla tenuta meccanica. Il cliente vuole sostituire tutta la pompa (non riparare) per avere garanzia. Impianto raggiungibile, non serve ponteggio. Urgenza media, entro questa settimana."
+];
+
+let urgenzaAttiva = 'media';
+let contatore = Math.floor(Math.random() * 900) + 100;
+
+function setUrgenza(val) {
+  urgenzaAttiva = val;
+  ['standard','media','alta'].forEach(u => document.getElementById('urg-'+u).classList.remove('active'));
+  document.getElementById('urg-'+val).classList.add('active');
+}
+
+function caricaEsempio(i) {
+  document.getElementById('richiesta').value = ESEMPI[i];
+  if (i === 0 || i === 3) setUrgenza('alta');
+  else if (i === 1) setUrgenza('media');
+  else setUrgenza('standard');
+  if (i === 0) { document.getElementById('tipo-impianto').value = 'aria compressa'; }
+  else if (i === 1) { document.getElementById('tipo-impianto').value = 'refrigerazione'; }
+  else if (i === 2) { document.getElementById('tipo-impianto').value = 'aria compressa'; }
+  else { document.getElementById('tipo-impianto').value = 'meccanica'; }
+}
+
+const LISTINO = `LISTINO TERMOFLEX SRL (uso interno — valori indicativi):
+MANODOPERA:
+- Tecnico specializzato: €58/h (orario standard lun-ven 8-17)
+- Maggiorazione urgenza (intervento in giornata): +40%
+- Maggiorazione fuori orario / sabato: +60%
+- Trasferta entro 30 km: €35 forfait
+- Trasferta 30-60 km: €65 forfait
+- Trasferta oltre 60 km: €95 + €0,40/km aggiuntivo
+
+INTERVENTI TIPICI (manodopera stimata):
+- Diagnosi e ispezione impianto: 1-2h
+- Sostituzione filtri compressore (aria+olio+desiccante): 2h
+- Sostituzione separatore olio/aria: 2-3h
+- Sostituzione cinghia compressore: 1h
+- Sostituzione valvola di sicurezza: 1-2h
+- Cambio olio compressore: 1h
+- Ricarica gas refrigerante (fino a 2kg): 1.5h
+- Sostituzione compressore frigo scroll: 4-6h
+- Sostituzione valvola termostatica: 2h
+- Sostituzione motore ventilatore: 2-3h
+- Sostituzione pompa centrifuga: 3-4h
+- Sostituzione cuscinetti: 2h
+- Taratura e collaudo impianto: 1h
+
+RICAMBI PRINCIPALI (prezzi medi di riferimento):
+- Filtro aria compressore: €45
+- Filtro olio: €32
+- Filtro desiccante: €55
+- Separatore olio/aria: €185
+- Cinghia trasmissione: €38
+- Valvola di sicurezza 10 bar: €210
+- Gas R-32 (bombola 10kg): €320
+- Gas R-410A (bombola 10kg): €290
+- Compressore scroll frigo 5HP: €1.250
+- Valvola termostatica espansione: €145
+- Motore ventilatore condensatore: €175
+- Pompa centrifuga 2" inox: €480
+- Cuscinetto SKF standard: €18-35
+- Olio sintetico compressore 5L: €68
+- Tenuta meccanica pompa: €85
+- Kit guarnizioni: €28`;
+
+async function generaPreventivo() {
+  const richiesta = document.getElementById('richiesta').value.trim();
+  if (!richiesta) {
+    document.getElementById('richiesta').focus();
+    return;
+  }
+
+  const btn = document.getElementById('gen-btn');
+  const icon = document.getElementById('gen-icon');
+  const spin = document.getElementById('gen-spin');
+  const txt = document.getElementById('gen-txt');
+  const errBox = document.getElementById('error-box');
+
+  btn.disabled = true; icon.style.display = 'none'; spin.style.display = 'block';
+  txt.textContent = 'Generazione in corso…'; errBox.style.display = 'none';
+
+  const cliente = document.getElementById('cliente').value.trim() || 'Cliente da specificare';
+  const tipoImpianto = document.getElementById('tipo-impianto').value;
+  const urgenzaLabel = { standard: 'Standard', media: 'Media', alta: 'Alta — intervento in giornata' }[urgenzaAttiva];
+
+  const prompt = `Sei un preventivista tecnico esperto di Termoflex Srl, azienda di manutenzione di impianti industriali (aria compressa, refrigerazione, meccanica) con sede a Bologna.
+
+Hai ricevuto questa richiesta di intervento:
+---
+${richiesta}
+---
+TIPO IMPIANTO: ${tipoImpianto}
+URGENZA: ${urgenzaLabel}
+CLIENTE: ${cliente}
+
+${LISTINO}
+
+Genera un preventivo strutturato in formato JSON con questa struttura ESATTA (rispondi SOLO con il JSON, nessun testo aggiuntivo, nessun markdown):
+{
+  "titolo": "titolo descrittivo dell'intervento (max 8 parole)",
+  "data": "data odierna: 15 giugno 2026",
+  "voci": [
+    {
+      "descrizione": "nome voce",
+      "dettaglio": "breve specifica tecnica opzionale",
+      "quantita": numero,
+      "unita": "h/pz/forfait/kg",
+      "prezzo_unitario": numero,
+      "totale": numero
+    }
+  ],
+  "totale_imponibile": numero,
+  "iva": 22,
+  "totale_iva": numero,
+  "totale_complessivo": numero,
+  "note_operative": "3-5 frasi con note tecniche, avvertenze, condizioni, raccomandazioni aggiuntive. Tono professionale e diretto.",
+  "validita_giorni": 30
+}
+
+Regole:
+- Includi SEMPRE manodopera e trasferta come voci separate
+- Applica maggiorazione urgenza se urgenza è alta o media
+- Includi i ricambi probabilmente necessari in base alla descrizione
+- I numeri devono essere coerenti (quantita × prezzo_unitario = totale)
+- totale_iva = totale_imponibile × 0.22, arrotondato
+- totale_complessivo = totale_imponibile + totale_iva`;
+
+  try {
+    const response = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content[0].text.replace(/```json|```/g, '').trim();
+    const prev = JSON.parse(raw);
+    renderPreventivo(prev, cliente);
+
+  } catch(e) {
+    errBox.style.display = 'flex';
+    console.error(e);
+  } finally {
+    btn.disabled = false; icon.style.display = 'block'; spin.style.display = 'none';
+    txt.textContent = 'Genera preventivo';
+  }
+}
+
+function renderPreventivo(p, cliente) {
+  contatore++;
+  const numPrev = `PRV-${new Date().getFullYear()}-${String(contatore).padStart(3,'0')}`;
+
+  document.getElementById('prev-titolo').textContent = p.titolo;
+  document.getElementById('prev-meta').textContent = `${cliente} · ${p.data} · Validità: ${p.validita_giorni} giorni`;
+  document.getElementById('prev-numero').textContent = numPrev;
+
+  const urgBadge = document.getElementById('prev-urgenza-badge');
+  const urgClasses = { standard: 'urgenza-standard', media: 'urgenza-media', alta: 'urgenza-alta' };
+  const urgLabels = { standard: '✓ Standard', media: '⚡ Urgenza media', alta: '🔴 Urgenza alta' };
+  urgBadge.className = urgClasses[urgenzaAttiva];
+  urgBadge.textContent = urgLabels[urgenzaAttiva];
+
+  const tbody = document.getElementById('voci-body');
+  tbody.innerHTML = p.voci.map(v => `
+    <tr>
+      <td><div class="voce-desc">${v.descrizione}</div>${v.dettaglio ? `<div class="voce-det">${v.dettaglio}</div>` : ''}</td>
+      <td class="mono">${v.quantita}</td>
+      <td class="mono">${v.unita}</td>
+      <td class="mono">€${Number(v.prezzo_unitario).toLocaleString('it-IT', {minimumFractionDigits:2})}</td>
+      <td>€${Number(v.totale).toLocaleString('it-IT', {minimumFractionDigits:2})}</td>
+    </tr>`).join('');
+
+  document.getElementById('totale-value').textContent = `€${Number(p.totale_imponibile).toLocaleString('it-IT', {minimumFractionDigits:2})}`;
+  document.getElementById('totale-iva').textContent = `+ IVA ${p.iva}% (€${Number(p.totale_iva).toLocaleString('it-IT', {minimumFractionDigits:2})}) = €${Number(p.totale_complessivo).toLocaleString('it-IT', {minimumFractionDigits:2})} totale`;
+  document.getElementById('note-content').textContent = p.note_operative;
+
+  document.getElementById('empty-state').style.display = 'none';
+  const prev = document.getElementById('preventivo');
+  prev.style.display = 'flex';
+}
+
+function nuovoPreventivo() {
+  document.getElementById('empty-state').style.display = 'flex';
+  document.getElementById('preventivo').style.display = 'none';
+  document.getElementById('richiesta').value = '';
+  document.getElementById('cliente').value = '';
+  setUrgenza('media');
+}
+
+function stampa() { window.print(); }
+</script>
+</body>
+</html>
